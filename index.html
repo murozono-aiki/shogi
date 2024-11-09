@@ -114,21 +114,23 @@
         flex-direction: column;
       }
       #branch {
-        flex: 1;
+        flex: 2;
         overflow-y: auto;
       }
       #branch > div {
-        margin: 10px 0;
+        margin: 5px 0;
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
         justify-content: space-between;
         align-items: center;
+        align-items: stretch;
       }
       #branch > div > button:nth-child(1) {
         background-color: inherit;
         border: none;
         width: 100%;
+        padding: 5px;
       }
       #branch > div > button:nth-child(2) {
         background-color: inherit;
@@ -157,16 +159,37 @@
       }
       /* 棋譜 */
       #kifu {
-        flex: 1;
+        flex: 3;
         overflow-y: auto;
       }
       #kifu > button {
-        display: block;
-        margin: 10px 0;
+        display: flex;
+        padding: 10px 0;
+        width: 100%;
+        border: none;
+        background-color: transparent;
       }
       #kifu > button:hover {
-        display: block;
-        margin: 10px 0;
+        background-color: #f1f1f1;
+      }
+      #kifu > button.notDefaultMove {
+        background-color: #ffc6c6aa;
+      }
+      #kifu > button.notDefaultMove:hover {
+        background-color: #f8dbdb;
+      }
+      #kifu > button > span:nth-child(1) {
+        width: 3rem;
+        text-align: right;
+        padding-right: 0.4rem;
+      }
+      #kifu > button > span:nth-child(2) {
+        text-align: left;
+      }
+      #kifu > button > span:nth-child(3) {
+        text-align: left;
+        padding-left: 0.5rem;
+        color: #036400;
       }
 
       @media (min-aspect-ratio: 3/2) {
@@ -1033,13 +1056,13 @@
         /**
          * 手を適用して盤面を更新
          * @param {[(number|undefined), (number|undefined), number, number, (undefined|string), boolean]} move - 手を示す配列
-         * @return {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, name:string, traditional_name:string, nextIndex:number[], lastIndex:number}} - 取った駒を含む手
+         * @return {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, moveCount:number, name:string, traditional_name:string, nextIndex:number[], lastIndex:number}} - 取った駒を含む手
         */
         makeMove(move) {
           // 手を適用して盤面を更新
           /**
            * 返り値
-           * @type {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, name:string, traditional_name:string, nextIndex:number[], lastIndex:number}}
+           * @type {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, moveCount:number, name:string, traditional_name:string, nextIndex:number[], lastIndex:number}}
           */
           let result = {};
           let [from_row, from_col, to_row, to_col, dropped_piece, whether_transform] = move;
@@ -1051,6 +1074,7 @@
           result.whether_transform = whether_transform;
           result.piece = "";
           result.take_piece = "";
+          result.moveCount = 0;
           result.name = "";
           result.traditional_name = "";
           result.nextIndex = [];
@@ -1113,7 +1137,6 @@
             }
           }
 
-          this.displayBoard();
           return result;
         }
 
@@ -1155,7 +1178,6 @@
           }
           
           this.turn = !this.turn;  // 手番交代
-          this.displayBoard();
         }
 
         playRandomMove() {
@@ -1173,7 +1195,7 @@
 
       /**
        * 現在の棋譜
-       * @type {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, name:string, traditional_name:string, nextIndex:number[], lastIndex:number}[]}
+       * @type {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, moveCount:number, name:string, traditional_name:string, nextIndex:number[], lastIndex:number}[]}
       */
       let currentGame = [
         {
@@ -1185,6 +1207,8 @@
           dropped_piece: undefined,
           whether_transform: undefined,
           take_piece: undefined,
+          moveCount: 0,
+          traditional_name: "開始局面",
           nextIndex: [],
           lastIndex: -1
         }
@@ -1253,11 +1277,13 @@
 
         if (newMove && is_LegalMove(move)) {
           const record_move = shogiEngine.makeMove(move);
+          shogiEngine.displayBoard();
 
           const record_index = currentGame.length;
           // 記録する値を追加
           // 前の手
           record_move.lastIndex = currentIndex;
+          record_move.moveCount = currentGame[currentIndex].moveCount + 1;
           // 指し手の表記
           const to_name = (currentGame[currentIndex].to_row == record_move.to_row && currentGame[currentIndex].to_col == record_move.to_col) ? "同　" : shogiEngine.convert_col[record_move.to_col] + shogiEngine.convert_row[record_move.to_row];
           const pieceName = shogiEngine.pieceName[record_move.piece];
@@ -1354,6 +1380,7 @@
           resetValue();
         }
         setBranch();
+        setKifu();
       }
 
       function setBranch() {
@@ -1388,6 +1415,7 @@
             currentGame[currentIndex].nextIndex[arrayIndex-1] = currentGame[currentIndex].nextIndex[arrayIndex];
             currentGame[currentIndex].nextIndex[arrayIndex] = temp;
             setBranch();
+            if (arrayIndex == 1) setKifu();
           });
           if (i == 0) upButton.disabled = true;
           downButton.addEventListener('click', event => {
@@ -1395,8 +1423,90 @@
             currentGame[currentIndex].nextIndex[arrayIndex+1] = currentGame[currentIndex].nextIndex[arrayIndex];
             currentGame[currentIndex].nextIndex[arrayIndex] = temp;
             setBranch();
+            if (arrayIndex == 0) setKifu();
           });
           if (i == branchIndex.length - 1) downButton.disabled = true;
+        }
+      }
+
+      function setKifu() {
+        const kifuElement = document.createElement('div');
+        document.getElementById("kifu").replaceWith(kifuElement);
+        kifuElement.id = "kifu";
+
+        const createMoveElement = (_index) => {
+          const moveElement = document.createElement('button');
+          const moveCountElement = document.createElement('span');
+          moveElement.appendChild(moveCountElement);
+          moveCountElement.textContent = currentGame[_index].moveCount + ".";
+          const moveNameElement = document.createElement('span');
+          moveElement.appendChild(moveNameElement);
+          moveNameElement.textContent = currentGame[_index].traditional_name;
+          if (currentGame[_index].nextIndex.length > 1) {
+            const branchCountElement = document.createElement('span');
+            moveElement.appendChild(branchCountElement);
+            branchCountElement.textContent = "+" + (currentGame[_index].nextIndex.length - 1);
+          }
+          if (currentGame[_index].lastIndex >= 0 && currentGame[currentGame[_index].lastIndex].nextIndex.indexOf(_index) != 0) {
+            moveElement.classList.add("notDefaultMove");
+          }
+          moveElement.addEventListener('click', event => {
+            const difference = currentGame[_index].moveCount - currentGame[currentIndex].moveCount;
+            if (difference < 0) {
+              for (let i = 0; i < Math.abs(difference); i++) {
+                shogiEngine.returnMove(currentGame[currentIndex]);
+                currentIndex = currentGame[currentIndex].lastIndex;
+              }
+              shogiEngine.displayBoard();
+              moveElement.scrollIntoView({block: "center", behavior: "smooth"});
+              legalMoves = shogiEngine.generateLegalMoves();
+              setBranch();
+              document.getElementById("next").disabled = false;
+              document.getElementById("last").disabled = false;
+              if (currentGame[currentIndex].lastIndex < 0) document.getElementById("last").disabled = true;
+            } else if (difference > 0) {
+              for (let i = 0; i < Math.abs(difference); i++) {
+                const moveObject = currentGame[currentGame[currentIndex].nextIndex[0]];
+                shogiEngine.makeMove([moveObject.from_row, moveObject.from_col, moveObject.to_row, moveObject.to_col, moveObject.dropped_piece, moveObject.whether_transform]);
+                currentIndex = currentGame[currentIndex].nextIndex[0];
+              }
+              shogiEngine.displayBoard();
+              moveElement.scrollIntoView({block: "center", behavior: "smooth"});
+              legalMoves = shogiEngine.generateLegalMoves();
+              setBranch();
+              document.getElementById("last").disabled = false;
+              document.getElementById("next").disabled = false;
+              if (currentGame[currentIndex].nextIndex.length == 0) document.getElementById("next").disabled = true;
+            } else {
+              moveElement.scrollIntoView({block: "center", behavior: "smooth"});
+            }
+          });
+          return moveElement;
+        };
+
+        let index;
+        const moves = [];
+
+        index = currentIndex;
+        const currentMoveElement = createMoveElement(index)
+        kifuElement.appendChild(currentMoveElement);
+
+        index = currentGame[index].lastIndex;
+        while (index >= 0) {
+          const moveElement = createMoveElement(index);
+          kifuElement.insertBefore(moveElement, kifuElement.firstChild);
+          index = currentGame[index].lastIndex;
+        }
+
+        index = currentGame[currentIndex].nextIndex[0];
+        while (index !== undefined) {
+          const moveElement = createMoveElement(index);
+          kifuElement.appendChild(moveElement);
+          index = currentGame[index].nextIndex[0];
+        }
+
+        if (currentMoveElement) {
+          currentMoveElement.scrollIntoView({block:"center"});
         }
       }
 
@@ -1466,6 +1576,7 @@
       function lastMove() {
         if (currentGame[currentIndex] && currentGame[currentIndex].lastIndex >= 0) {
           shogiEngine.returnMove(currentGame[currentIndex]);
+          shogiEngine.displayBoard();
           currentIndex = currentGame[currentIndex].lastIndex;
           resetValue();
           legalMoves = shogiEngine.generateLegalMoves();
@@ -1474,6 +1585,7 @@
             document.getElementById("last").disabled = true;
           }
           setBranch();
+          setKifu();
         } else {
           document.getElementById("last").disabled = true;
         }
@@ -1484,6 +1596,7 @@
           const index = currentGame[currentIndex].nextIndex[moveIndex];
           const move = currentGame[index];
           shogiEngine.makeMove([move.from_row, move.from_col, move.to_row, move.to_col, move.dropped_piece, move.whether_transform]);
+          shogiEngine.displayBoard();
           currentIndex = index;
           resetValue();
           legalMoves = shogiEngine.generateLegalMoves();
@@ -1492,6 +1605,7 @@
             document.getElementById("next").disabled = true;
           }
           setBranch();
+          setKifu();
         } else {
           document.getElementById("next").disabled = true;
         }
