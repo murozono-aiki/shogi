@@ -1,5 +1,6 @@
 {
     "name": "将棋",
+    "short_name": "将棋",
     "start_url": "./",
     "icons": [
       {

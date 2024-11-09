@@ -107,12 +107,14 @@
         box-shadow: #a2a2a2 2px 2px 4px;
       }
       /* 分岐 */
-      #branch_manager {
+      #panel {
         width: 40vh;
         height: 80vh;
+        display: flex;
+        flex-direction: column;
       }
       #branch {
-        height: 100%;
+        flex: 1;
         overflow-y: auto;
       }
       #branch > div {
@@ -153,20 +155,40 @@
         border-color: #999999;
         background-color: inherit;
       }
+      /* 棋譜 */
+      #kifu {
+        flex: 1;
+        overflow-y: auto;
+      }
+      #kifu > button {
+        display: block;
+        margin: 10px 0;
+      }
+      #kifu > button:hover {
+        display: block;
+        margin: 10px 0;
+      }
+
       @media (min-aspect-ratio: 3/2) {
-        #showBranch {
+        #showPanel {
           display: none;
         }
-        #closeBranch {
+        #closePanel {
           display: none;
         }
       }
       @media (max-aspect-ratio: 3/2) {
-        #branch_manager {
+        #panel {
           display: none;
           position: fixed;
-          background-color: white;
+          background-color: #ffffffde;
           box-shadow: #a2a2a2 2px 2px 4px;
+        }
+        #closePanel {
+          text-align: right;
+          background-color: transparent;
+          border: none;
+          padding: 7px;
         }
       }
 
@@ -449,11 +471,12 @@
       <div id="manager">
         <button id="last">前</button>
         <button id="next">次</button>
-        <button id="showBranch">分岐</button>
+        <button id="showPanel">分岐・棋譜</button>
       </div>
-      <div id="branch_manager">
-        <button id="closeBranch">×閉じる</button>
+      <div id="panel">
+        <button id="closePanel">×閉じる</button>
         <div id="branch"></div>
+        <div id="kifu"></div>
       </div>
     </div>
     <dialog id="confirm_transform">
@@ -1479,13 +1502,13 @@
       document.getElementById("next").addEventListener('click', event => {
         nextMove(0);
       });
-      document.getElementById("showBranch").addEventListener('click', event => {
-        document.getElementById("branch_manager").style.display = "block";
-        document.getElementById("showBranch").disabled = true;
+      document.getElementById("showPanel").addEventListener('click', event => {
+        document.getElementById("panel").style.display = "flex";
+        document.getElementById("showPanel").disabled = true;
       });
-      document.getElementById("closeBranch").addEventListener('click', event => {
-        document.getElementById("branch_manager").style.display = "";
-        document.getElementById("showBranch").disabled = false;
+      document.getElementById("closePanel").addEventListener('click', event => {
+        document.getElementById("panel").style.display = "";
+        document.getElementById("showPanel").disabled = false;
       });
       //document.getElementById("board_area").requestFullscreen();
     </script>
