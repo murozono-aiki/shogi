@@ -1,3 +1,34 @@
+const LOWER_CASE = /^[a-z]+$/;
+const UPPER_CASE = /^[A-Z]+$/;
+
+/**
+ * 文字列が小文字かどうかを判定する関数
+ * @param {string} string 文字列
+ * @returns {boolean}
+ */
+function isLowerCase(string) {
+    return LOWER_CASE.test(string);
+}
+/**
+ * 文字列が大文字がどうかを判定する関数
+ * @param {string} string 文字列
+ * @returns {boolean}
+ */
+function isUpperCase(string) {
+    return UPPER_CASE.test(string);
+}
+/**
+ * 小文字だけの文字列を大文字だけの文字列に、そうでない文字列を小文字だけの文字列に変換する関数
+ * @param {string} string 文字列
+ * @returns {string}
+ */
+function swapCase(string) {
+    if (LOWER_CASE.test(string)) {
+        return string.toUpperCase();
+    } else {
+        return string.toLowerCase();
+    }
+}
 String.prototype.isLowerCase = function () {
     return /^[a-z]+$/.test(this);
 };
@@ -39,7 +70,7 @@ class ShogiEngine {
         // 先手の王
         this.firstKing = "k";
         // 後手の王
-        this.secondKing = "K"
+        this.secondKing = "K";
 
         // 勝者
         this.winner = 0;  // 0:未定 1:先手 -1:後手
@@ -277,7 +308,7 @@ class ShogiEngine {
                 const element = document.getElementById("" + (9 - col) + (row + 1) + "_piece");
                 if (piece != "") {
                     element.textContent = this.pieceName[piece];
-                    if (piece.isLowerCase()) {
+                    if (isLowerCase(piece)) {
                         element.style.transform = "";
                     } else {
                         element.style.transform = "rotate(180deg)";
@@ -325,7 +356,7 @@ class ShogiEngine {
                 let piece = useBoard[i][j];
                 if (piece == "") {
                     legalMoves = legalMoves.concat(this.getDropMovesForPiece(i, j, turn));
-                } else if (piece.isLowerCase() == turn) {  // 手番の駒
+                } else if (isLowerCase(piece) == turn) {  // 手番の駒
                     let piece_kind = piece.toLowerCase()
                     legalMoves = legalMoves.concat(this.getLegalMovesForPiece(i, j, piece_kind, turn, useBoard));
                 }
@@ -346,7 +377,7 @@ class ShogiEngine {
                 let piece = useBoard[from_row][from_col];
                 if (whether_transform) {  // 成る場合
                     let transform_piece = this.transform[piece.toLowerCase()];
-                    if (piece.isLowerCase()) {
+                    if (isLowerCase(piece)) {
                         piece = transform_piece;
                     } else {
                         piece = transform_piece.toUpperCase();
@@ -356,7 +387,7 @@ class ShogiEngine {
                 board[from_row][from_col] = "";
             } else {
                 // 持ち駒を打つ場合
-                if (dropped_piece.isLowerCase() != turn) {
+                if (isLowerCase(dropped_piece) != turn) {
                     dropped_piece = dropped_piece.swapCase();
                 }
                 board[to_row][to_col] = dropped_piece;
@@ -378,7 +409,7 @@ class ShogiEngine {
                 for (let j = 0; j < 9; j++) {
                     if (check) break;
                     let piece = board[i][j];
-                    if (piece && piece.isLowerCase() != turn) {  // 手番の駒
+                    if (piece && isLowerCase(piece) != turn) {  // 手番の駒
                         let piece_kind = piece.toLowerCase();
                         const next_legalMoves = this.getLegalMovesForPiece(i, j, piece_kind, !turn, board);
                         for (let move of next_legalMoves) {
@@ -404,7 +435,7 @@ class ShogiEngine {
                     if (check) break;
                     let is_p = false;
                     for (let j = 0; j < 9; j++) {
-                        if (board[j][i].isLowerCase() == turn && board[j][i].toLowerCase() == "p") {
+                        if (isLowerCase(board[j][i]) == turn && board[j][i].toLowerCase() == "p") {
                             if (is_p) {
                                 check = true;
                                 break;
@@ -480,7 +511,7 @@ class ShogiEngine {
         for (let position of pieceMove.move_position) {
             const moveRow = row + (position[0] * rowIndex);
             const moveCol = col + (position[1] * colIndex);
-            if (moveRow >= 0 && moveRow < 9 && moveCol >= 0 && moveCol < 9 && (!board[moveRow][moveCol] || board[moveRow][moveCol].isLowerCase() != turn)) {
+            if (moveRow >= 0 && moveRow < 9 && moveCol >= 0 && moveCol < 9 && (!board[moveRow][moveCol] || isLowerCase(board[moveRow][moveCol]) != turn)) {
                 legalMoves.push([row, col, moveRow, moveCol, undefined, false]);
                 if (piece.toLowerCase() in this.transform && (transform_row[row] || transform_row[moveRow])) {
                     legalMoves.push([row, col, moveRow, moveCol, undefined, true]);
@@ -496,7 +527,7 @@ class ShogiEngine {
                 moveRow += rowDirection;
                 moveCol += colDirection;
                 if (moveRow < 0 || moveRow >= 9 || moveCol < 0 || moveCol >= 9) break;
-                if (!board[moveRow][moveCol] || board[moveRow][moveCol].isLowerCase() != turn) {
+                if (!board[moveRow][moveCol] || isLowerCase(board[moveRow][moveCol]) != turn) {
                     legalMoves.push([row, col, moveRow, moveCol, undefined, false]);
                     if (piece.toLowerCase() in this.transform && (transform_row[row] || transform_row[moveRow])) {
                         legalMoves.push([row, col, moveRow, moveCol, undefined, true]);
@@ -514,7 +545,7 @@ class ShogiEngine {
         // 持ち駒を打つ手の生成
         const dropMoves = []
         for (let piece in this.hands) {
-            if (this.hands[piece] > 0 && piece.isLowerCase() == turn) {
+            if (this.hands[piece] > 0 && isLowerCase(piece) == turn) {
                     dropMoves.push([undefined, undefined, to_row, to_col, piece, false]);
             }
         }
@@ -538,15 +569,18 @@ class ShogiEngine {
     }
 
     /**
+     * @typedef {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, moveCount:number, name:string, traditional_name:string, nextIndex:number[], deletedNextIndex:number[], lastIndex:number}} moveObject
+     */
+    /**
      * 手を適用して盤面を更新
      * @param {[(number|undefined), (number|undefined), number, number, (undefined|string), boolean]} move - 手を示す配列
-     * @return {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, moveCount:number, name:string, traditional_name:string, nextIndex:number[], lastIndex:number}} - 取った駒を含む手
+     * @return {moveObject} - 取った駒を含む手
     */
     makeMove(move) {
         // 手を適用して盤面を更新
         /**
          * 返り値
-         * @type {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, moveCount:number, name:string, traditional_name:string, nextIndex:number[], lastIndex:number}}
+         * @type {moveObject}
         */
         let result = {};
         let [from_row, from_col, to_row, to_col, dropped_piece, whether_transform] = move;
@@ -562,6 +596,7 @@ class ShogiEngine {
         result.name = "";
         result.traditional_name = "";
         result.nextIndex = [];
+        result.deletedNextIndex = [];
         result.lastIndex = -1;
 
         const legalMoves = this.generateLegalMoves();
@@ -573,7 +608,7 @@ class ShogiEngine {
             let take_piece = this.board[to_row][to_col];
             if (whether_transform) {  // 成る場合
                 let transform_piece = this.transform[piece.toLowerCase()];
-                if (piece.isLowerCase()) {
+                if (isLowerCase(piece)) {
                     piece = transform_piece;
                 } else {
                     piece = transform_piece.toUpperCase();
@@ -584,7 +619,7 @@ class ShogiEngine {
             if (take_piece != "") {  // 持ち駒の追加
                 result.take_piece = take_piece;
                 if (take_piece.toLowerCase() in this.transform_return) {
-                    if (take_piece.isLowerCase()) {
+                    if (isLowerCase(take_piece)) {
                         take_piece = this.transform_return[take_piece.toLowerCase()];
                     } else {
                         take_piece = this.transform_return[take_piece.toLowerCase()].toUpperCase();
@@ -597,7 +632,7 @@ class ShogiEngine {
         } else {
             // 持ち駒を打つ場合
             result.piece = dropped_piece;
-            if (dropped_piece.isLowerCase() != this.turn) {
+            if (isLowerCase(dropped_piece) != this.turn) {
                 dropped_piece = dropped_piece.swapCase();
             }
             this.hands[dropped_piece] -= 1;
@@ -626,7 +661,7 @@ class ShogiEngine {
 
     /**
      * 手を戻す
-     * @param {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:(undefined|string), nextIndex:number[], lastIndex:number}} move - 手
+     * @param {moveObject} move - 手
     */
     returnMove(move) {
         const {from_row, from_col, to_row, to_col, dropped_piece, whether_transform, take_piece} = move;
@@ -635,7 +670,7 @@ class ShogiEngine {
             let piece = this.board[to_row][to_col];
             if (whether_transform) {  // 成る場合
                 let transform_piece = this.transform_return[piece.toLowerCase()];
-                if (piece.isLowerCase()) {
+                if (isLowerCase(piece)) {
                     piece = transform_piece;
                 } else {
                     piece = transform_piece.toUpperCase();
@@ -646,7 +681,7 @@ class ShogiEngine {
             if (take_piece) {  // 持ち駒の追加
                 let hand_piece = take_piece.swapCase();
                 if (hand_piece.toLowerCase() in this.transform_return) {
-                    if (hand_piece.isLowerCase()) {
+                    if (isLowerCase(hand_piece)) {
                         hand_piece = this.transform_return[hand_piece.toLowerCase()];
                     } else {
                         hand_piece = this.transform_return[hand_piece.toLowerCase()].toUpperCase();
@@ -679,7 +714,7 @@ class ShogiEngine {
 
 /**
  * 現在の棋譜
- * @type {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, moveCount:number, name:string, traditional_name:string, nextIndex:number[], lastIndex:number}[]}
+ * @type {moveObject[]}
 */
 let currentGame = [
     {
@@ -694,6 +729,7 @@ let currentGame = [
         moveCount: 0,
         traditional_name: "開始局面",
         nextIndex: [],
+        deletedNextIndex: [],
         lastIndex: -1
     }
 ];  // {from_row, from_col, to_row, to_col, dropped_piece, whether_transform, take_piece, nextIndex(array), lastIndex}
@@ -757,6 +793,16 @@ function makeMove() {
             break;
         }
     }
+    for (let i = 0; i < currentGame[currentIndex].deletedNextIndex.length; i++) {
+        const move_ = currentGame[currentGame[currentIndex].deletedNextIndex[i]];
+        if (move_.from_row === from_row && move_.from_col === from_col && move_.to_row === to_row && move_.to_col === to_col && move_.dropped_piece === dropped_piece && move_.whether_transform === whether_transform) {
+            newMove = false;
+            const nextMoveIndex = currentGame[currentIndex].deletedNextIndex.splice(i, 1)[0];
+            currentGame[currentIndex].nextIndex.push(nextMoveIndex);
+            nextMove(currentGame[currentIndex].nextIndex.length - 1);
+            break;
+        }
+    }
 
 
     if (newMove && is_LegalMove(move)) {
@@ -786,7 +832,7 @@ function makeMove() {
         for (let legalMove of legalMoves) {
             const [from_row_, from_col_, to_row_, to_col_, dropped_piece_, whether_transform_] = legalMove;
             if (dropped_piece_ == undefined && to_row_ == record_move.to_row && to_col_ == record_move.to_col && shogiEngine.board[from_row_][from_col_] == record_move.piece/* 同じ手も排除 */) {
-                const turn = record_move.piece.isLowerCase();
+                const turn = isLowerCase(record_move.piece);
                 if (record_move.from_row === undefined && record_move.from_col === undefined) {
                     drop_traditional = "打";
                     break;  // "打"がある場合動きは１通りに決まる
@@ -875,7 +921,8 @@ function setBranch() {
 
     const branchIndex = currentGame[currentIndex].nextIndex;
     for (let i = 0; i < branchIndex.length; i++) {
-        const index = branchIndex[i];
+        const arrayIndex = i;
+        const index = branchIndex[arrayIndex];
 
         const element = document.createElement('div');
         branchElement.appendChild(element);
@@ -892,9 +939,8 @@ function setBranch() {
         downButton.textContent = "↓";
         deleteButton.textContent = "削除";
         nameButton.addEventListener('click', event => {
-            nextMove(i);
+            nextMove(arrayIndex);
         });
-        const arrayIndex = i;
         upButton.addEventListener('click', event => {
             const temp = currentGame[currentIndex].nextIndex[arrayIndex-1];
             currentGame[currentIndex].nextIndex[arrayIndex-1] = currentGame[currentIndex].nextIndex[arrayIndex];
@@ -911,6 +957,12 @@ function setBranch() {
             if (arrayIndex == 0) setKifu();
         });
         if (i == branchIndex.length - 1) downButton.disabled = true;
+        deleteButton.addEventListener('click', event => {
+            currentGame[currentIndex].nextIndex.splice(arrayIndex, 1);
+            currentGame[currentIndex].deletedNextIndex.push(index);
+            setBranch();
+            setKifu();
+        });
     }
 }
 
@@ -946,6 +998,8 @@ function setKifu() {
                 moveElement.scrollIntoView({block: "center", behavior: "smooth"});
                 legalMoves = shogiEngine.generateLegalMoves();
                 setBranch();
+                setKifu();
+                setPannelButtonName();
                 document.getElementById("next").disabled = false;
                 document.getElementById("last").disabled = false;
                 if (currentGame[currentIndex].lastIndex < 0) document.getElementById("last").disabled = true;
@@ -959,6 +1013,8 @@ function setKifu() {
                 moveElement.scrollIntoView({block: "center", behavior: "smooth"});
                 legalMoves = shogiEngine.generateLegalMoves();
                 setBranch();
+                setKifu();
+                setPannelButtonName();
                 document.getElementById("last").disabled = false;
                 document.getElementById("next").disabled = false;
                 if (currentGame[currentIndex].nextIndex.length == 0) document.getElementById("next").disabled = true;
@@ -991,16 +1047,25 @@ function setKifu() {
     }
 
     if (currentMoveElement) {
+        currentMoveElement.style.fontWeight = "bold";
         currentMoveElement.scrollIntoView({block:"center"});
     }
 }
 
 function setPannelButtonName() {
-    let name = currentGame[currentIndex].traditional_name;
+    let name = "";
+    if (currentIndex % 2 != 0) {
+        name += "▲";
+    } else {
+        name += "▽";
+    }
+    name += currentGame[currentIndex].traditional_name;
     if (currentGame[currentIndex].nextIndex.length > 1) {
         name += " +";
     }
-    document.getElementById("showPanel").textContent = name;
+    requestAnimationFrame(() => {
+        document.getElementById("showPanel").textContent = name;
+    });
 }
 
 document.getElementById("transform_button").addEventListener('click', event => {
@@ -1016,7 +1081,7 @@ function showTransformDialog() {
     const transformPieceName = shogiEngine.pieceName[shogiEngine.transform[piece.toLowerCase()]];
     document.getElementById("transform_button").textContent = transformPieceName;
     document.getElementById("not_transform_button").textContent = pieceName;
-    if (piece.isLowerCase()) {
+    if (isLowerCase(piece)) {
         document.getElementById("transform_button").style.transform = "";
         document.getElementById("not_transform_button").style.transform = "";
     } else {
