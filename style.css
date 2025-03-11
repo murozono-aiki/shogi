@@ -1,0 +1,311 @@
+/* 全般 */
+html {
+    font-family: "Noto Sans JP", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    color: #333333;
+}
+body {
+    margin: 0;
+}
+input, button {
+    font-family: inherit;
+    font-optical-sizing: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    color: inherit;
+}
+button {
+    cursor: pointer;
+}
+button:disabled {
+    cursor: default;
+}
+
+/* 将棋盤 */
+#board_area {
+    user-select: none;
+}
+#board {
+    border-collapse: collapse;
+    background-color: #eed789;
+    outline: min(1vh, 1vw) solid #eed789;
+    margin: min(1vh, 1vw);
+}
+#board td {
+    border: 1px solid #333333;
+    box-sizing: border-box;
+    width: min(10.5vh, 10.5vw);
+    height: min(10.5vh, 10.5vw);
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+}
+#board tr:nth-child(3) td:nth-child(3)::after,
+#board tr:nth-child(3) td:nth-child(6)::after,
+#board tr:nth-child(6) td:nth-child(3)::after,
+#board tr:nth-child(6) td:nth-child(6)::after {
+    content: '';
+    position: absolute;
+    right: max(-0.3vh, -0.3vw);
+    bottom: max(-0.3vh, -0.3vw);
+    box-sizing: border-box;
+    width: min(0.6vh, 0.6vw);
+    height: min(0.6vh, 0.6vw);
+    background: #333333;
+    border-radius: 50%;
+}
+.board_piece {
+    width: 100%;
+    height: min-content;
+    font-size: min(7vh, 7vw);
+    text-align: center;
+    line-height: 1;
+}
+.hands {
+    margin: 6px 5px;
+    width: min(10vh, 10vw);
+    height: min(7vh, 7vw);
+}
+.hands_piece {
+    font-size: min(6vh, 6vw);
+}
+.hands_count {
+    font-size: min(4vh, 4vw);
+}
+/* 操作部 */
+#manager {
+    margin: 10px;
+}
+#manager button {
+    background-color: white;
+    margin: 5px;
+    padding: 8px;
+    border-radius: 3px;
+    font-size: 1.1rem;
+    line-height: 1;
+    border-style: solid;
+    writing-mode: vertical-rl;
+    height: fit-content;
+}
+#manager button:focus-visible {
+    outline: none;
+    box-shadow: #a2a2a2 2px 2px 4px;
+}
+/* 分岐 */
+#panel {
+    width: 40vh;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+#branch {
+    flex: 2;
+    overflow-y: auto;
+}
+#branch > div {
+    margin: 5px 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    align-items: stretch;
+}
+#branch > div > button:nth-child(1) {
+    background-color: inherit;
+    border: none;
+    width: 100%;
+    padding: 5px;
+}
+#branch > div > button:nth-child(2) {
+    background-color: inherit;
+    border: 1px solid #999999;
+}
+#branch > div > button:nth-child(3) {
+    background-color: inherit;
+    border: 1px solid #999999;
+}
+#branch > div > button:nth-child(4) {
+    background-color: inherit;
+    border: 1px solid #999999;
+}
+#branch > div > button {
+    border-radius: 2px;
+    white-space: nowrap;
+    margin: 0 3px;
+}
+#branch > div > button:hover {
+    background-color: #f1f1f1;
+}
+#branch > div > button:disabled {
+    color: #999999;
+    border-color: #999999;
+    background-color: inherit;
+}
+/* 棋譜 */
+#kifu {
+    flex: 3;
+    overflow-y: auto;
+}
+#kifu > button {
+    display: flex;
+    padding: 10px 0;
+    width: 100%;
+    border: none;
+    background-color: transparent;
+}
+#kifu > button:hover {
+    background-color: #f1f1f1;
+}
+#kifu > button.notDefaultMove {
+    background-color: #ffc6c6aa;
+}
+#kifu > button.notDefaultMove:hover {
+    background-color: #f8dbdb;
+}
+#kifu > button > span:nth-child(1) {
+    width: 3rem;
+    text-align: right;
+    padding-right: 0.4rem;
+}
+#kifu > button > span:nth-child(2) {
+    text-align: left;
+}
+#kifu > button > span:nth-child(3) {
+    text-align: left;
+    padding-left: 0.5rem;
+    color: #036400;
+}
+
+@media (min-aspect-ratio: 3/2) {
+    #showPanel {
+        display: none;
+    }
+    #closePanel {
+        display: none;
+    }
+}
+@media (max-aspect-ratio: 3/2) {
+    #panel {
+        display: none;
+        position: fixed;
+        background-color: #ffffffde;
+        box-shadow: #a2a2a2 2px 2px 4px;
+    }
+    #closePanel {
+        text-align: right;
+        background-color: transparent;
+        border: none;
+        padding: 7px;
+    }
+}
+
+#board_area {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+#first_hands_area, #second_hands_area {
+    display: flex;
+    height: 94.5vh;
+    width: auto;
+}
+#first_hands_area {
+    flex-direction: column-reverse;
+}
+#second_hands_area {
+    flex-direction: column;
+}
+#first_hands, #second_hands {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: fit-content;
+    height: fit-content;
+    background-color: #eaaf32;
+    min-width: min(6vh, 6vw);
+    min-height: min(6vh, 6vw);
+}
+#first_hands {
+    flex-direction: column-reverse;
+    margin-left: 4px;
+}
+#second_hands {
+    flex-direction: column;
+    margin-right: 4px;
+}
+.hands {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    justify-content: space-evenly;
+}
+#second_hands .hands {
+    transform: rotate(180deg);
+}
+#manager {
+    display: flex;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+@media (max-aspect-ratio: 1/1) {
+    #board_area {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+    #first_hands_area, #second_hands_area {
+        width: 94.5vw;
+        height: auto;
+    }
+    #first_hands_area {
+        flex-direction: row-reverse;
+    }
+    #second_hands_area {
+        flex-direction: row;
+    }
+    #first_hands, #second_hands {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    #first_hands {
+        flex-direction: row-reverse;
+        margin-top: 4px;
+    }
+    #second_hands {
+        flex-direction: row;
+        margin-bottom: 4px;
+    }
+    #manager {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+    #manager button {
+        writing-mode: initial;
+    }
+}
+
+#confirm_transform {
+    border-radius: 3px;
+}
+#transform_button, #not_transform_button {
+    font-size: min(7vh, 7vw);
+    background-color: #eed789;
+    line-height: 1;
+    padding: min(4vh, 4vw);
+    margin: min(3vh, 3vw);
+    border: none;
+}
