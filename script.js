@@ -569,7 +569,21 @@ class ShogiEngine {
     }
 
     /**
-     * @typedef {{from_row:(number|undefined), from_col:(number|undefined), to_row:number, to_col:number, piece:string, dropped_piece:(undefined|string), whether_transform:boolean, take_piece:string, moveCount:number, name:string, traditional_name:string, nextIndex:number[], deletedNextIndex:number[], lastIndex:number}} moveObject
+     * @typedef {object} moveObject
+     * @property {number} [from_row]
+     * @property {number} [from_col]
+     * @property {number} to_row
+     * @property {number} to_col
+     * @property {string} piece
+     * @property {string} [dropped_piece]
+     * @property {boolean} whether_transform
+     * @property {string} take_piece
+     * @property {number} moveCount
+     * @property {string} name
+     * @property {string} traditional_name
+     * @property {number[]} nextIndex
+     * @property {number[]} deletedNextIndex
+     * @property {number} lastIndex
      */
     /**
      * 手を適用して盤面を更新
